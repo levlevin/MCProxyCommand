@@ -1,4 +1,4 @@
-config-version = "2.6"
+config-version = "2.7"
 # Bind to default minecraft port -1 to not have to look this up again and again and again
 bind = "0.0.0.0:25564"
 # What should be the MOTD? This gets displayed when the player adds your server to
@@ -17,10 +17,10 @@ forced-hosts = {}
 	minecraft2 = "localhost:25566"
 	# Specify the order of servers that are used
 	try = ["minecraft"]
-
 [advanced]
+	#Allows players transferred from other hosts via the
+	#Transfer packet (Minecraft 1.20.5) to be received.
+	accepts-transfers = false
 	announce-proxy-commands = false
-
 [metrics]
 	enabled = false
-

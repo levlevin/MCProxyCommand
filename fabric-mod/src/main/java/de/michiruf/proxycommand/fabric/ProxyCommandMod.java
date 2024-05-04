@@ -23,41 +23,58 @@ import org.slf4j.LoggerFactory;
  */
 public class ProxyCommandMod implements ModInitializer {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger("ProxyCommand");
+  public static final Logger LOGGER = LoggerFactory.getLogger("ProxyCommand");
+  private static S2CPacket packetSender = new S2CPacket();
 
-    @Override
-    public void onInitialize() {
-        LOGGER.info("ProxyCommand is active");
-        CommandRegistrationCallback.EVENT.register((dispatcher, registry, environment) -> registerCommand(dispatcher));
+  @Override
+  public void onInitialize() {
+    LOGGER.info("ProxyCommand is active");
+    CommandRegistrationCallback.EVENT.register(
+        (dispatcher, registry, environment) ->
+      registerCommand(dispatcher)
+    );
+  }
+
+  private static void registerCommand(
+    CommandDispatcher<ServerCommandSource> dispatcher
+  ) {
+    LiteralCommandNode<ServerCommandSource> proxyCommand = CommandManager
+      .literal("proxycommand")
+      .requires(cmd -> cmd.hasPermissionLevel(2))
+      .then(
+        CommandManager
+          .argument("command", StringArgumentType.string())
+          .executes(ProxyCommandMod::sendMessage)
+          .build()
+      )
+      .build();
+    dispatcher.getRoot().addChild(proxyCommand);
+  }
+
+  private static int sendMessage(CommandContext<ServerCommandSource> context) {
+    var command = StringArgumentType.getString(context, "command");
+
+    var player = context.getSource().getPlayer();
+    if (player == null) {
+      LOGGER.warn(
+        "Command \"" + command + "\" was executed without the player as source"
+      );
+      context
+        .getSource()
+        .sendMessage(Text.literal("Command source must be a player"));
+      return -1;
     }
 
-    private static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
-        LiteralCommandNode<ServerCommandSource> proxyCommand = CommandManager
-                .literal("proxycommand")
-                .requires(cmd -> cmd.hasPermissionLevel(2))
-                .then(CommandManager.argument("command", StringArgumentType.string())
-                        .executes(ProxyCommandMod::sendMessage)
-                        .build())
-                .build();
-        dispatcher.getRoot().addChild(proxyCommand);
-    }
+    LOGGER.info(
+      "Proxycommand \"" +
+      command +
+      "\" was triggered by " +
+      player.getName().getString()
+    );
+    // To communicate with the proxy, a S2C packet sent via the players connection is needed (the player's connection is the means of communication with the proxy)
 
-    private static int sendMessage(CommandContext<ServerCommandSource> context) {
-        var command = StringArgumentType.getString(context, "command");
+    packetSender.sendCommandPacket(player, command);
 
-        var player = context.getSource().getPlayer();
-        if (player == null) {
-            LOGGER.warn("Command \"" + command + "\" was executed without the player as source");
-            context.getSource().sendMessage(Text.literal("Command source must be a player"));
-            return -1;
-        }
-
-        LOGGER.info("Proxycommand \"" + command + "\" was triggered by " + player.getName().getString());
-        // To communicate with the proxy, a S2C packet sent via the players connection is needed (the player's connection is the means of communication with the proxy)
-        ServerPlayNetworking.send(
-                player,
-                new Identifier(ProxyCommandConstants.COMMAND_PACKET_ID),
-                PacketByteBufs.create().writeString(command));
-        return 1;
-    }
+    return 1;
+  }
 }

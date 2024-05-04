@@ -1,15 +1,15 @@
 plugins {
-    id 'fabric-loom' version '1.0-SNAPSHOT'
+    id 'fabric-loom' version '1.6-SNAPSHOT'
     id 'com.modrinth.minotaur' version '2.+'
 }
 
 // Fabric Properties. Check these on https://modmuss50.me/fabric.html
-def minecraft_version='1.20.1'
+def minecraft_version='1.20.5'
 
-def yarn_mappings='1.20.1+build.9'
-def loader_version='0.14.21'
+def yarn_mappings='1.20.5+build.1'
+def loader_version='0.15.11'
 
-def fabric_version='0.84.0+1.20.1'
+def fabric_version='0.97.8+1.20.5'
 
 repositories {
     // NOTE This should currently be not needed, but to fiddle around with this dependency issue
@@ -31,9 +31,9 @@ dependencies {
     // Even after figuring this out, the stuff distributed there does not work with these mod dependencies,
     // although the mods and versions are completely identical. I made dependency diffs and checked them myself:
     // except the fabric-gametest-api-v1 everything was present and equal.
-    //modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    //modImplementation("net.fabricmc.fabric-api:fabric-api-deprecated:${project.fabric_version}") {
-    //    //exclude group: 'fabric-api-deprecated', module 'fabric-gametest-api-v1'
+    //modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+    //modImplementation("net.fabricmc.fabric-api:fabric-api-deprecated:${fabric_version}") {
+    //exclude group: 'fabric-api-deprecated', module 'fabric-gametest-api-v1'
     //}
     // However, depending on the modrinth version of fabric-api works, so we just go with that and ignore
     // this weirdness
@@ -50,8 +50,8 @@ dependencies {
 
     // FabricProxy-Lite including transitives
     // https://github.com/OKTW-Network/FabricProxy-Lite
-    //modImplementation 'maven.modrinth:fabricproxy-lite:v2.6.0'
-    //modImplementation 'com.moandjiezana.toml:toml4j:0.7.2'
+    modImplementation 'maven.modrinth:fabricproxy-lite:v2.8.0'
+    modImplementation 'com.moandjiezana.toml:toml4j:0.7.2'
 
 
     // TODO These problems here could occur because loom, fabric or sponge or just something remaps the stuff
@@ -62,10 +62,10 @@ dependencies {
 }
 
 modrinth {
-    projectId = 'proxy-command'
+    projectId = 'proxy-command-reloaded'
     versionNumber = project.version
     versionType = project.version.contains('SNAPSHOT') ? 'alpha' : 'release'
-    gameVersions = ['1.20.1']
+    gameVersions = ['1.20.5']
     loaders = ['fabric']
     dependencies {
         required.project 'fabric-api'
